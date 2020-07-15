@@ -1,6 +1,14 @@
 
 function takeQuiz(quizId) {
-    sessionStorage.setItem('user_email', 'test@test.com');
+    let userEmailElement = document.getElementById('emailid');
+
+    if (!userEmailElement.checkValidity()) {
+        alert("Enter a valid email address");
+        return;
+    }
+    let userEmail = userEmailElement.value;
+
+    sessionStorage.setItem('user_email', userEmail);
     sessionStorage.setItem('quiz_id', quizId);
 
     window.location.replace("/quiz_ui");

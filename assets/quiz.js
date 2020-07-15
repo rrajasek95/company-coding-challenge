@@ -1,8 +1,3 @@
-
-function updateTimer() {
-
-}
-
 function getQuestions() {
     return fetch('/quiz')
         .then(response => {
@@ -11,21 +6,21 @@ function getQuestions() {
 }
 
 let timer = {
-    "defaultTime": 180,
-    "remainingTime": 180,
+    "defaultTime": 10,
     "internalTimer": null,
-    "initialize": function () {
+    "onCompletion": null,
+    "initialize": function (onCompletionCallback) {
         var that = this;
         this.remainingTime = this.defaultTime;
-        this.timerElement = document.getElementById('time_span')
+        this.timerElement = document.getElementById('time_span');
         this.internalTimer = setInterval(() => that.tick(), 1000);
+        this.onCompletion = onCompletionCallback;
     },
 
     "tick": function() {
-        if (this.remainingTime == 0) {
-            // Logic to advance to next question
+        if (this.remainingTime === 0) {
+            this.onCompletion();
             clearInterval(this.internalTimer);
-            return;
         }
         this.remainingTime -= 1;
 
@@ -36,25 +31,68 @@ let timer = {
 
         this.timerElement.innerHTML = minutesStr + ":" + secondsStr;
     },
-
+    "clear": function() {
+        clearInterval(this.internalTimer);
+    },
     "timerElement": null,
-
 };
 
-function renderQuestionInUi(question) {
-    let questionTextElement = document.getElementById('question_text');
-    questionTextElement.innerHTML = question.text;
 
-    timer.initialize();
+function getQuizManager(questions) {
+    return {
+        "questions": questions,
+        "responses": [],
+        "currentIndex": -1,
+        "renderQuestionInUi": function(question, currentIndex) {
+            let questionIndexElement = document.getElementById('question_id');
+            // Render question i of n
+            questionIndexElement.innerHTML = `${(currentIndex + 1)} of ${this.questions.length}`;
+
+            let questionTextElement = document.getElementById('question_text');
+            questionTextElement.innerHTML = question.text;
+            timer.initialize(() => this.advanceQuestion());
+        },
+        "advanceQuestion": function() {
+            if (this.currentIndex > -1) {
+                // Add current response to list of responses
+                let response = document.getElementById('response').value;
+                this.responses.push(response);
+            }
+
+            this.currentIndex += 1;
+
+            if (this.currentIndex === questions.length) {
+                this.completeQuiz();
+
+            } else {
+                this.renderQuestionInUi(questions[this.currentIndex], this.currentIndex);
+            }
+        },
+        "submitAllResponses": function() {
+            // Send a POST request
+            fetch('/quiz')
+        },
+        "completeQuiz": function() {
+            // We have exhausted all questions, now submit the response
+            timer.clear();
+            this.submitAllResponses();
+        },
+        "startQuiz": function () {
+            this.advanceQuestion();
+        }
+    }
 }
 
 function submitResponse() {
-    let quizResponse= document.getElementById('response').value;
+    let quizResponse = document.getElementById('response').value;
 }
 
 (function() {
     getQuestions().then(questions => {
-        renderQuestionInUi(questions[0]);
+        let manager = getQuizManager(questions);
+        let submitButton = document.getElementById('submit');
+        submitButton.addEventListener('click', () => manager.advanceQuestion());
+        manager.startQuiz();
     });
 
 })();

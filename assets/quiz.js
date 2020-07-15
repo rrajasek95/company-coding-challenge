@@ -6,10 +6,11 @@ function getQuestions(quizId) {
 }
 
 let timer = {
-    "defaultTime": 10,
+    "defaultTime": 180,
     "internalTimer": null,
     "onCompletion": null,
     "initialize": function (onCompletionCallback) {
+        clearInterval(this.internalTimer);
         var that = this;
         this.remainingTime = this.defaultTime;
         this.timerElement = document.getElementById('time_span');
@@ -19,8 +20,8 @@ let timer = {
 
     "tick": function() {
         if (this.remainingTime === 0) {
-            this.onCompletion();
             clearInterval(this.internalTimer);
+            this.onCompletion();
         }
         this.remainingTime -= 1;
 

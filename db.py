@@ -1,3 +1,4 @@
+import sqlite3
 
 class DB(object):
     """
@@ -31,6 +32,9 @@ class DB(object):
         }
     }
 
+    def __init__(self, db_url):
+        self.db = sqlite3.connect(db_url)
+
     def get_quiz(self, quiz_id):
         """
         Get the specified quiz
@@ -48,4 +52,4 @@ class DB(object):
     def get_all_quizzes(self):
         return list(DB.quizzes.keys())
 
-db = DB()
+db = DB('quiz.db')

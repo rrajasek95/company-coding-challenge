@@ -70,14 +70,22 @@ function getQuizManager(questions) {
         },
         "submitAllResponses": function() {
             // Send a POST request
-            fetch('/quiz/1')
+            return fetch('/quiz/1', {
+                "method": 'POST',
+                "body": JSON.stringify({
+                    "user_email": "test@test.com",
+                    "responses": this.responses
+                }),
+                'headers': {
+                    'Content-type': 'application/json; charset=UTF-8'
+                }
+            });
         },
         "completeQuiz": function() {
             // We have exhausted all questions, now submit the response
             timer.clear();
-            window.location.replace("/thankyou");
             this.submitAllResponses().then(() => {
-
+                window.location.replace("/thankyou");
             });
         },
         "startQuiz": function () {

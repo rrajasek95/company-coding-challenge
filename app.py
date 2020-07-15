@@ -20,7 +20,7 @@ def handle_quiz(id):
     else:
         # Assume POST request and JSON
         submission = request.get_json()
-        db.submit_quiz_responses(id, submission['user_id'], submission['responses'])
+        db.submit_quiz_responses(id, submission['user_email'], submission['responses'])
         return json.dumps({"submitted": True}), 200
 
 

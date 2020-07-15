@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, render_template
+from flask import Flask, request, render_template
 
 from db import db
 
@@ -12,16 +12,22 @@ def hello_world():
     return 'Hello, World!'
 
 
-@app.route('/quiz')
-def get_quiz():
-    quiz = db.get_quiz("1")
-    return json.dumps(quiz)
+@app.route('/quiz/<id>', methods=['GET', 'POST'])
+def handle_quiz(id):
+    if request.method == "GET":
+        quiz = db.get_quiz(id)
+        return json.dumps(quiz)
+    else:
+        # Assume POST request and JSON
+        submission = request.get_json()
+        db.submit_quiz_responses(id, submission['user_id'], submission['responses'])
+        return json.dumps({"submitted": True}), 200
 
-
-@app.route('/quiz/{id}')
-def submit_quiz():
-    pass
 
 @app.route('/quiz_ui/')
 def get_quiz_ui():
     return render_template('quiz.html')
+
+@app.route('/thankyou')
+def get_thank_you_page():
+    return render_template('thankyou.html')

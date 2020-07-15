@@ -1,5 +1,5 @@
 function getQuestions() {
-    return fetch('/quiz')
+    return fetch('/quiz/1')
         .then(response => {
             return response.json()
         });
@@ -70,21 +70,20 @@ function getQuizManager(questions) {
         },
         "submitAllResponses": function() {
             // Send a POST request
-            fetch('/quiz')
+            fetch('/quiz/1')
         },
         "completeQuiz": function() {
             // We have exhausted all questions, now submit the response
             timer.clear();
-            this.submitAllResponses();
+            window.location.replace("/thankyou");
+            this.submitAllResponses().then(() => {
+
+            });
         },
         "startQuiz": function () {
             this.advanceQuestion();
         }
     }
-}
-
-function submitResponse() {
-    let quizResponse = document.getElementById('response').value;
 }
 
 (function() {

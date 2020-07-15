@@ -1,5 +1,5 @@
-function getQuestions() {
-    return fetch('/quiz/1')
+function getQuestions(quizId) {
+    return fetch(`/quiz/${quizId}`)
         .then(response => {
             return response.json()
         });
@@ -38,8 +38,9 @@ let timer = {
 };
 
 
-function getQuizManager(questions) {
+function getQuizManager(questions, userEmail) {
     return {
+        "userEmail": userEmail,
         "questions": questions,
         "responses": [],
         "currentIndex": -1,
@@ -73,7 +74,7 @@ function getQuizManager(questions) {
             return fetch('/quiz/1', {
                 "method": 'POST',
                 "body": JSON.stringify({
-                    "user_email": "test@test.com",
+                    "user_email": this.userEmail,
                     "responses": this.responses
                 }),
                 'headers': {
@@ -95,8 +96,10 @@ function getQuizManager(questions) {
 }
 
 (function() {
-    getQuestions().then(questions => {
-        let manager = getQuizManager(questions);
+    let userEmail = window.sessionStorage.getItem('user_email');
+    let quizId = window.sessionStorage.getItem('quiz_id');
+    getQuestions(quizId).then(questions => {
+        let manager = getQuizManager(questions, userEmail);
         let submitButton = document.getElementById('submit');
         submitButton.addEventListener('click', () => manager.advanceQuestion());
         manager.startQuiz();

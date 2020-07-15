@@ -9,8 +9,11 @@ app = Flask(__name__, static_url_path='/assets',
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World!'
+    return render_template('startpage.html')
 
+@app.route('/quizzes')
+def get_all_quizzes():
+    return json.dumps(db.get_all_quizzes())
 
 @app.route('/quiz/<id>', methods=['GET', 'POST'])
 def handle_quiz(id):

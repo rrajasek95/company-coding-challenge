@@ -45,5 +45,7 @@ class DB(object):
 
         return True
 
+    def get_all_quizzes(self):
+        return list(DB.quizzes.keys())
 
 db = DB()

@@ -37,7 +37,7 @@ class DB(object):
         :param id:
         :return:
         """
-        return DB.quizzes.get(id)
+        return DB.quizzes.get(quiz_id)
 
     def submit_quiz_responses(self, quiz_id, user_id, responses):
         quiz = DB.responses.get(id)

@@ -1,3 +1,5 @@
+import json
+
 from flask import Flask, render_template
 
 from db import db
@@ -10,9 +12,10 @@ def hello_world():
     return 'Hello, World!'
 
 
-@app.route('/quiz/{id}')
+@app.route('/quiz')
 def get_quiz():
-    return 'Test'
+    quiz = db.get_quiz("1")
+    return json.dumps(quiz)
 
 
 @app.route('/quiz/{id}')
@@ -22,7 +25,3 @@ def submit_quiz():
 @app.route('/quiz_ui/')
 def get_quiz_ui():
     return render_template('quiz.html')
-
-@app.route('/assets/<path:path>')
-def send_asset(path):
-    return send_fom_directory('assets', path)

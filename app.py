@@ -1,11 +1,25 @@
 import json
+import sqlite3
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, g
 
-from db import db
 
 app = Flask(__name__, static_url_path='/assets',
             static_folder='assets')
+
+DATABASE = 'quiz.db'
+
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+    return db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 
 @app.route('/')
 def hello_world():
@@ -13,17 +27,32 @@ def hello_world():
 
 @app.route('/quizzes')
 def get_all_quizzes():
-    return json.dumps(db.get_all_quizzes())
+    c = get_db().cursor()
+    c.execute('''SELECT * FROM quizzes''')
+    quizzes = [row[0] for row in c.fetchall()]
+    return json.dumps(quizzes)
 
 @app.route('/quiz/<id>', methods=['GET', 'POST'])
 def handle_quiz(id):
     if request.method == "GET":
-        quiz = db.get_quiz(id)
-        return json.dumps(quiz)
+        c = get_db().cursor()
+        c.execute('''SELECT text FROM questions WHERE quiz_id=?''', id)
+        questions = [{"text": row[0]} for row in c.fetchall()]
+        c.close()
+
+        return json.dumps(questions)
     else:
         # Assume POST request and JSON
         submission = request.get_json()
-        db.submit_quiz_responses(id, submission['user_email'], submission['responses'])
+        c = get_db().cursor()
+        responses = submission['responses']
+        print(submission)
+        try:
+            c.execute('''REPLACE INTO responses(quiz_id, user_email, responses) VALUES (?, ?, ?)''', (id, submission['user_email'], json.dumps(responses)));
+        except sqlite3.Error as e:
+            print(e)
+        get_db().commit()
+
         return json.dumps({"submitted": True}), 200
 
 
